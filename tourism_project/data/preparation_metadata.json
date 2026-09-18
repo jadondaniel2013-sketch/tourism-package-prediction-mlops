@@ -1,0 +1,39 @@
+{
+  "raw_shape": [
+    4128,
+    21
+  ],
+  "clean_shape": [
+    4128,
+    19
+  ],
+  "duplicate_rows_removed": 0,
+  "dropped_columns": [
+    "Unnamed: 0",
+    "CustomerID"
+  ],
+  "category_standardization": {
+    "Gender": {
+      "Fe Male": "Female"
+    },
+    "Occupation": {
+      "Free Lancer": "Freelancer"
+    },
+    "MaritalStatus": {
+      "Unmarried": "Single"
+    }
+  },
+  "train_rows": 3302,
+  "test_rows": 826,
+  "train_target_distribution": {
+    "0": 2664,
+    "1": 638
+  },
+  "test_target_distribution": {
+    "0": 667,
+    "1": 159
+  },
+  "random_state": 42,
+  "test_size": 0.2,
+  "stratified_on": "ProdTaken"
+}
