@@ -1,0 +1,149 @@
+name: Tourism Package Prediction CI/CD
+
+# Trigger the end-to-end MLOps workflow whenever project code or data is pushed to main.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "tourism_project/**"
+      - ".github/workflows/pipeline.yml"
+  # Also allow the learner to run the workflow manually from the GitHub Actions tab.
+  workflow_dispatch:
+
+# Allow the workflow to commit the trained model and create GitHub Releases as the model registry.
+permissions:
+  contents: write
+
+jobs:
+  # Job 1 validates and fingerprints the raw dataset stored in the GitHub repository.
+  register-dataset:
+    name: Register Dataset in GitHub
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the current main-branch repository contents.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # Install the same Python version used for model training and Streamlit hosting.
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Install the project dependencies required by the registration script.
+      - name: Install dependencies
+        run: pip install -r tourism_project/requirements.txt
+      # Validate the raw schema and create a checksum-based GitHub data manifest.
+      - name: Register and validate raw dataset
+        run: python tourism_project/model_building/data_register.py
+      # Preserve the raw dataset and registration manifest as a CI artifact for this workflow run.
+      - name: Upload registered-data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: registered-data
+          path: |
+            tourism_project/data/tourism.csv
+            tourism_project/data/data_manifest.json
+
+  # Job 2 cleans the data, removes non-predictive IDs, and creates stratified train/test files.
+  data-preparation:
+    name: Prepare Data
+    needs: register-dataset
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the same repository revision validated by the registration stage.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # Configure Python for reproducible preprocessing.
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Install the project dependencies required for preprocessing.
+      - name: Install dependencies
+        run: pip install -r tourism_project/requirements.txt
+      # Execute the deterministic cleaning and stratified split script.
+      - name: Clean and split data
+        run: python tourism_project/model_building/prep.py
+      # Pass the fixed train/test datasets and preparation metadata to the model-training stage.
+      - name: Upload prepared-data artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prepared-data
+          path: |
+            tourism_project/data/cleaned_tourism.csv
+            tourism_project/data/train.csv
+            tourism_project/data/test.csv
+            tourism_project/data/preparation_metadata.json
+
+  # Job 3 tunes XGBoost, logs every trial in MLflow, evaluates the best model, and prepares deployment artifacts.
+  model-training:
+    name: Train, Track, Evaluate, and Register Model
+    needs: data-preparation
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository so code and deployment directories are available.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # Configure the same Python version used in the preceding jobs and hosting environment.
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Install XGBoost, scikit-learn, MLflow, and the other training dependencies.
+      - name: Install dependencies
+        run: pip install -r tourism_project/requirements.txt
+      # Download the exact prepared splits produced by the data-preparation job.
+      - name: Download prepared-data artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: prepared-data
+          path: tourism_project/data
+      # Start a local MLflow server so every tuned parameter combination and final metric is tracked in the workflow.
+      - name: Start MLflow tracking server
+        run: |
+          nohup mlflow server --host 127.0.0.1 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlartifacts > mlflow.log 2>&1 &
+          sleep 8
+      # Run hyperparameter tuning, evaluation, model serialization, feature importance, and MLflow logging.
+      - name: Train and evaluate model
+        env:
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+        run: python tourism_project/model_building/train.py
+      # Run a deployment smoke test to ensure the saved model can score a realistic raw customer row.
+      - name: Smoke-test deployment model
+        run: python tourism_project/deployment/smoke_test.py
+      # Preserve MLflow tracking records, metrics, feature importance, and the trained model for auditability.
+      - name: Upload model-and-tracking artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model-and-mlflow
+          path: |
+            tourism_project/deployment/best_tourism_model.joblib
+            tourism_project/model_building/model_metrics.json
+            tourism_project/model_building/feature_importance.csv
+            tourism_project/model_building/experiment_results.csv
+            mlflow.db
+            mlartifacts
+            mlflow.log
+      # Commit the newly trained deployment model and evaluation artifacts back to main so Streamlit sees the update.
+      - name: Commit trained model and evaluation files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tourism_project/deployment/best_tourism_model.joblib
+          git add tourism_project/model_building/model_metrics.json
+          git add tourism_project/model_building/feature_importance.csv
+          git add tourism_project/model_building/experiment_results.csv
+          git commit -m "Update trained tourism model [skip ci]" || echo "No model changes to commit"
+          git push
+      # Create a versioned GitHub Release so each successful trained model is registered outside Hugging Face.
+      - name: Register model as GitHub Release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="model-run-${{ github.run_number }}"
+          gh release create "$TAG" \
+            tourism_project/deployment/best_tourism_model.joblib \
+            tourism_project/model_building/model_metrics.json \
+            tourism_project/model_building/feature_importance.csv \
+            --title "Tourism model - workflow run ${{ github.run_number }}" \
+            --notes "XGBoost tourism purchase model produced by GitHub Actions with MLflow-tracked tuning."
