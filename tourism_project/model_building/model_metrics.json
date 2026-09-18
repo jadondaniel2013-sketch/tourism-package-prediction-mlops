@@ -1,0 +1,100 @@
+{
+  "model": "XGBClassifier",
+  "selection_metric": "roc_auc",
+  "best_cv_roc_auc": 0.911676101094451,
+  "class_ratio_negative_to_positive": 4.175548589341693,
+  "best_params": {
+    "classifier__colsample_bytree": 0.8,
+    "classifier__learning_rate": 0.1,
+    "classifier__max_depth": 5,
+    "classifier__n_estimators": 200,
+    "classifier__scale_pos_weight": 4.18,
+    "classifier__subsample": 0.8
+  },
+  "train_metrics": {
+    "accuracy": 0.9869775893397941,
+    "precision": 0.9394387001477105,
+    "recall": 0.9968652037617555,
+    "f1": 0.9673003802281369,
+    "roc_auc": 0.9993475058130231,
+    "confusion_matrix": [
+      [
+        2623,
+        41
+      ],
+      [
+        2,
+        636
+      ]
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.9164648910411622,
+    "precision": 0.7710843373493976,
+    "recall": 0.8050314465408805,
+    "f1": 0.7876923076923077,
+    "roc_auc": 0.9527594693219429,
+    "confusion_matrix": [
+      [
+        629,
+        38
+      ],
+      [
+        31,
+        128
+      ]
+    ]
+  },
+  "top_features_by_permutation_importance": [
+    {
+      "feature": "Passport",
+      "importance_mean": 0.07876816308826728,
+      "importance_std": 0.007035079706231882
+    },
+    {
+      "feature": "ProductPitched",
+      "importance_mean": 0.07113990174723964,
+      "importance_std": 0.008687551435559807
+    },
+    {
+      "feature": "Age",
+      "importance_mean": 0.058336869301198566,
+      "importance_std": 0.002502454818799641
+    },
+    {
+      "feature": "DurationOfPitch",
+      "importance_mean": 0.048264546971797204,
+      "importance_std": 0.004671891430696037
+    },
+    {
+      "feature": "MonthlyIncome",
+      "importance_mean": 0.03483918418149423,
+      "importance_std": 0.0026936203489219233
+    },
+    {
+      "feature": "PitchSatisfactionScore",
+      "importance_mean": 0.03331541776281675,
+      "importance_std": 0.005660585244215831
+    },
+    {
+      "feature": "MaritalStatus",
+      "importance_mean": 0.031080686072058383,
+      "importance_std": 0.004785747363910593
+    },
+    {
+      "feature": "CityTier",
+      "importance_mean": 0.029907687665601257,
+      "importance_std": 0.004076888288395476
+    },
+    {
+      "feature": "PreferredPropertyStar",
+      "importance_mean": 0.029196722393520336,
+      "importance_std": 0.0024385908507347587
+    },
+    {
+      "feature": "NumberOfTrips",
+      "importance_mean": 0.019973032351748698,
+      "importance_std": 0.004290891628254877
+    }
+  ]
+}
