@@ -15,6 +15,11 @@ on:
 permissions:
   contents: write
 
+# Prevent multiple workflow runs from updating the main branch at the same time.
+concurrency:
+  group: tourism-package-prediction-main
+  cancel-in-progress: false
+
 jobs:
   # Job 1 validates and fingerprints the raw dataset stored in the GitHub repository.
   register-dataset:
@@ -24,6 +29,8 @@ jobs:
       # Checkout the current main-branch repository contents.
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       # Install the same Python version used for model training and Streamlit hosting.
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -53,6 +60,8 @@ jobs:
       # Checkout the same repository revision validated by the registration stage.
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       # Configure Python for reproducible preprocessing.
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -84,6 +93,8 @@ jobs:
       # Checkout the repository so code and deployment directories are available.
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       # Configure the same Python version used in the preceding jobs and hosting environment.
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -134,7 +145,21 @@ jobs:
           git add tourism_project/model_building/feature_importance.csv
           git add tourism_project/model_building/experiment_results.csv
           git commit -m "Update trained tourism model [skip ci]" || echo "No model changes to commit"
-          git push
+          git pull --rebase origin main
+          for attempt in 1 2 3
+          do
+            if git push origin main; then
+              echo "Model artifacts successfully pushed to main."
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Push failed after three attempts."
+              exit 1
+            fi
+            echo "Remote branch changed. Synchronizing before retry."
+            git pull --rebase origin main
+            sleep 3
+          done
       # Create a versioned GitHub Release so each successful trained model is registered outside Hugging Face.
       - name: Register model as GitHub Release asset
         env:
