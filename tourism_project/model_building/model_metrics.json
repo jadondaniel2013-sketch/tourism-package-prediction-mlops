@@ -1,7 +1,7 @@
 {
   "model": "XGBClassifier",
   "selection_metric": "roc_auc",
-  "best_cv_roc_auc": 0.9116241207989813,
+  "best_cv_roc_auc": 0.911676101094451,
   "class_ratio_negative_to_positive": 4.175548589341693,
   "best_params": {
     "classifier__colsample_bytree": 0.8,
@@ -12,89 +12,89 @@
     "classifier__subsample": 0.8
   },
   "train_metrics": {
-    "accuracy": 0.9897032101756511,
-    "precision": 0.9507462686567164,
-    "recall": 0.9984326018808778,
-    "f1": 0.9740061162079511,
-    "roc_auc": 0.9994834175868659,
+    "accuracy": 0.9869775893397941,
+    "precision": 0.9394387001477105,
+    "recall": 0.9968652037617555,
+    "f1": 0.9673003802281369,
+    "roc_auc": 0.9993475058130231,
     "confusion_matrix": [
       [
-        2631,
-        33
+        2623,
+        41
       ],
       [
-        1,
-        637
+        2,
+        636
       ]
     ]
   },
   "test_metrics": {
-    "accuracy": 0.923728813559322,
-    "precision": 0.7926829268292683,
-    "recall": 0.8176100628930818,
-    "f1": 0.804953560371517,
-    "roc_auc": 0.9540229885057471,
+    "accuracy": 0.9164648910411622,
+    "precision": 0.7710843373493976,
+    "recall": 0.8050314465408805,
+    "f1": 0.7876923076923077,
+    "roc_auc": 0.9527594693219429,
     "confusion_matrix": [
       [
-        633,
-        34
+        629,
+        38
       ],
       [
-        29,
-        130
+        31,
+        128
       ]
     ]
   },
   "top_features_by_permutation_importance": [
     {
       "feature": "Passport",
-      "importance_mean": 0.07414406004544896,
-      "importance_std": 0.007612241372815907
+      "importance_mean": 0.07876816308826728,
+      "importance_std": 0.007035079706231882
     },
     {
       "feature": "ProductPitched",
-      "importance_mean": 0.05385043327392902,
-      "importance_std": 0.009853981549610799
+      "importance_mean": 0.07113990174723964,
+      "importance_std": 0.008687551435559807
     },
     {
       "feature": "Age",
-      "importance_mean": 0.05326770576975659,
-      "importance_std": 0.004038772086925273
+      "importance_mean": 0.058336869301198566,
+      "importance_std": 0.002502454818799641
     },
     {
       "feature": "DurationOfPitch",
-      "importance_mean": 0.05156289779638472,
-      "importance_std": 0.0041247008411500405
-    },
-    {
-      "feature": "MaritalStatus",
-      "importance_mean": 0.03388305847076454,
-      "importance_std": 0.005754596832308721
+      "importance_mean": 0.048264546971797204,
+      "importance_std": 0.004671891430696037
     },
     {
       "feature": "MonthlyIncome",
-      "importance_mean": 0.03134659085551557,
-      "importance_std": 0.0035591411866509963
-    },
-    {
-      "feature": "CityTier",
-      "importance_mean": 0.030179249997642564,
-      "importance_std": 0.004012681005871892
+      "importance_mean": 0.03483918418149423,
+      "importance_std": 0.0026936203489219233
     },
     {
       "feature": "PitchSatisfactionScore",
-      "importance_mean": 0.029975578248611478,
-      "importance_std": 0.005640329719684937
+      "importance_mean": 0.03331541776281675,
+      "importance_std": 0.005660585244215831
+    },
+    {
+      "feature": "MaritalStatus",
+      "importance_mean": 0.031080686072058383,
+      "importance_std": 0.004785747363910593
+    },
+    {
+      "feature": "CityTier",
+      "importance_mean": 0.029907687665601257,
+      "importance_std": 0.004076888288395476
     },
     {
       "feature": "PreferredPropertyStar",
-      "importance_mean": 0.027414594589497666,
-      "importance_std": 0.002248883271653421
+      "importance_mean": 0.029196722393520336,
+      "importance_std": 0.0024385908507347587
     },
     {
       "feature": "NumberOfTrips",
-      "importance_mean": 0.019610949242359888,
-      "importance_std": 0.003566472039351933
+      "importance_mean": 0.019973032351748698,
+      "importance_std": 0.004290891628254877
     }
   ]
 }
